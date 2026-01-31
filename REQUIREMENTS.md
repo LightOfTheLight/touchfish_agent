@@ -69,6 +69,11 @@ Supports:
 1. Update PR
 
 
+## Documentation requirement
+
+- `BUILD.md`: instructions of how to build the images
+- `USAGE.md`: instructions of how to use this project, including how to get and set tokens of `codex` and `gh`
+
 
 
 
