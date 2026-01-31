@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  agent:
+    build: .
+    env_file:
+      - .env
+    environment:
+      AGENT_NAME: ${AGENT_NAME}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      REPO_URL: ${REPO_URL}
+      WORKDIR: /workspace
+      CODEX_CMD: ${CODEX_CMD:-codex}
+      CODEX_SESSION_FILE: /codex/session.json
+      POLL_INTERVAL: ${POLL_INTERVAL:-60}
+    volumes:
+      - ${WORKSPACE_DIR}:/workspace
+      - ${CODEX_SESSION_FILE}:/codex/session.json
+    tty: true
