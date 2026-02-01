@@ -137,7 +137,7 @@ case_issue_fix_multiple_comments() {
   # shellcheck source=/dev/null
   source "$ROOT_DIR/scripts/agent.sh"
 
-  issue_fix_cycle 42 101
+  (cd "$repo" && issue_fix_cycle 42 101)
 
   local last_msg
   last_msg=$(git -C "$repo" log -1 --pretty=%B)
@@ -192,7 +192,7 @@ REQ
   # shellcheck source=/dev/null
   source "$ROOT_DIR/scripts/agent.sh"
 
-  implementing_cycle "$last_sha" "$repo/REQUIREMENTS.md"
+  (cd "$repo" && implementing_cycle "$last_sha" "$repo/REQUIREMENTS.md")
 
   local last_msg
   last_msg=$(git -C "$repo" log -1 --pretty=%B)
