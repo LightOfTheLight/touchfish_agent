@@ -34,6 +34,9 @@ PATH="$ROOT_DIR/tests/mocks:$PATH"
 TEST_TMP=$(mktemp -d)
 mkdir -p "$(dirname "$REPORT_PATH")"
 : > "$REPORT_PATH"
+exec > >(tee -a "$REPORT_PATH") 2>&1
+export PS4='+ ${BASH_SOURCE##*/}:${LINENO}: '
+set -x
 
 cleanup() {
   rm -rf "$TEST_TMP"
