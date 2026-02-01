@@ -69,11 +69,19 @@ Supports:
 1. Update PR
 
 
-## Documentation requirement
+
+## Non-functional Requirements
+
+### Documentation requirement
 
 - `BUILD.md`: instructions of how to build the images
 - `USAGE.md`: instructions of how to use this project, including how to get and set tokens of `codex` and `gh`
 
+### Test requirement
 
-
-
+- Generate unit test script:
+    * Mock `gh` command to emulate github output
+    * Mock `codex` command to varify agent prompt
+    * Create one-time containers to run the test script and generate report
+    * Test cases should be data driven, test data should be easy to understand
+        - 
