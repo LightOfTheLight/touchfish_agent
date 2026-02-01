@@ -86,6 +86,7 @@ Supports:
     * Print every command executed during unit tests for investigation
     * Provide a command-line flag to enable verbose unit test output (default off)
     * Mock `git` to avoid network push during unit tests
+    * Provide a command-line flag to run tests in container (default off)
     * Covers scenarios:
         - Issue fix with multiple comments
         - Requirement changes

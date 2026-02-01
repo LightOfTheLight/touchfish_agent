@@ -4,9 +4,15 @@ set -euo pipefail
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 REPORT_PATH=${TEST_REPORT:-"$ROOT_DIR/tests/report.txt"}
 VERBOSE=${UNIT_TEST_VERBOSE:-0}
+RUN_IN_CONTAINER_FLAG=0
 
 if [[ "${1:-}" == "--verbose" ]]; then
   VERBOSE=1
+  shift
+fi
+
+if [[ "${1:-}" == "--run-in-container" ]]; then
+  RUN_IN_CONTAINER_FLAG=1
   shift
 fi
 
@@ -40,6 +46,10 @@ run_in_container() {
 }
 
 if [[ "${RUN_IN_CONTAINER:-}" != "1" ]]; then
+  if [[ "$RUN_IN_CONTAINER_FLAG" != "1" ]]; then
+    echo "Use --run-in-container to execute tests inside Docker." >&2
+    exit 2
+  fi
   run_in_container
   exit $?
 fi

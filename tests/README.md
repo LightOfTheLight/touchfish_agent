@@ -2,10 +2,10 @@
 
 ## Unit test script
 
-Run the unit tests with Docker (recommended):
+Run the unit tests with Docker:
 
 ```bash
-./tests/unit_test.sh
+./tests/unit_test.sh --run-in-container
 ```
 
 This will build a one-time test image, copy the workspace into a container, and run the tests inside it. The report is written to:
