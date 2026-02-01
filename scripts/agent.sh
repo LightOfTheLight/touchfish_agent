@@ -33,10 +33,21 @@ ensure_git_identity() {
 }
 
 ensure_git_credentials() {
-  if [[ "$REPO_URL" == https://* ]]; then
+  local origin_url
+  origin_url=$(git remote get-url origin 2>/dev/null || true)
+
+  if [[ -z "$origin_url" ]]; then
+    return 0
+  fi
+
+  if [[ "$origin_url" == https://* && "$origin_url" != *"@"* ]]; then
     local token_url
-    token_url="${REPO_URL/https:\/\//https:\/\/${GITHUB_TOKEN}@}"
+    token_url="${origin_url/https:\/\//https:\/\/${GITHUB_TOKEN}@}"
     git remote set-url origin "$token_url"
+  fi
+
+  if [[ "$origin_url" == https://* ]]; then
+    git config http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64)"
   fi
 }
 
