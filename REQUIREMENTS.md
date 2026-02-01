@@ -70,18 +70,20 @@ Supports:
 
 
 
-## Non-functional Requirements
-
-### Documentation requirement
+## Documentation requirements
 
 - `BUILD.md`: instructions of how to build the images
 - `USAGE.md`: instructions of how to use this project, including how to get and set tokens of `codex` and `gh`
 
-### Test requirement
+## Unit Test requirements
 
-- Generate unit test script:
+- Generate unit test script `tests/unit_test.sh`:
     * Mock `gh` command to emulate github output
     * Mock `codex` command to varify agent prompt
     * Create one-time containers to run the test script and generate report
     * Test cases should be data driven, test data should be easy to understand
-        - 
+    * Covers scenarios:
+        - Issue fix with multiple comments
+        - Requirement changes
+        - PR merged
+- Generate test readme file `tests/README.md` to explain how to run the tests

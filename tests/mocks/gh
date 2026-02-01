@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${GH_CALL_LOG:?GH_CALL_LOG not set}"
+
+echo "gh $*" >> "$GH_CALL_LOG"
+
+if [[ "$#" -lt 2 ]]; then
+  exit 0
+fi
+
+cmd="$1 $2"
+
+case "$cmd" in
+  "issue view")
+    if [[ -n "${GH_MOCK_ISSUE_JSON:-}" ]]; then
+      cat "$GH_MOCK_ISSUE_JSON"
+    fi
+    ;;
+  "issue list")
+    # Expected to output just a number when using -q filter.
+    if [[ -n "${GH_MOCK_ISSUE_LIST:-}" ]]; then
+      echo "$GH_MOCK_ISSUE_LIST"
+    fi
+    ;;
+  "issue edit")
+    :
+    ;;
+  "issue comment")
+    :
+    ;;
+  "pr comment")
+    :
+    ;;
+  "pr list")
+    if [[ -n "${GH_MOCK_PR_LIST:-}" ]]; then
+      echo "$GH_MOCK_PR_LIST"
+    fi
+    ;;
+  "pr view")
+    if [[ "${GH_PR_MERGED:-}" == "true" ]]; then
+      echo "true"
+    else
+      echo "false"
+    fi
+    ;;
+  "repo view")
+    echo "main"
+    ;;
+  *)
+    :
+    ;;
+esac

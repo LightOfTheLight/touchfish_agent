@@ -1,0 +1,14 @@
+{
+  "title": "Fix incorrect prompt handling",
+  "body": "The agent fails to include context in its prompt.",
+  "comments": [
+    {
+      "author": {"login": "alice"},
+      "body": "First comment with extra context."
+    },
+    {
+      "author": {"login": "bob"},
+      "body": "Second comment with more details."
+    }
+  ]
+}

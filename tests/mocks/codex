@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${CODEX_PROMPT_LOG:?CODEX_PROMPT_LOG not set}"
+
+cat > "$CODEX_PROMPT_LOG"
+
+if [[ -n "${CODEX_OUTPUT_FILE:-}" ]]; then
+  echo "change" >> "$CODEX_OUTPUT_FILE"
+fi

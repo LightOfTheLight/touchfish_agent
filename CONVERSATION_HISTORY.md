@@ -16,3 +16,11 @@
 - Assistant: added .gitignore to exclude .env
 - User: commit with proper description
 - Assistant: preparing commit
+- User: Implement unit test based on the change of REQUIREMENTS.md
+- Assistant: adding unit tests for requirements file discovery
+- User: Generate unit testcases based on the new discription of REQUIREMENTS.md
+- Assistant: adding tests for documentation requirements
+- User: Follow the "Unit Test requirements" chapter in REQUIREMENTS.md to generate unit test cases
+- Assistant: added unit test harness, mocks, and test README
+- User: commit with detail comments
+- Assistant: preparing detailed commit

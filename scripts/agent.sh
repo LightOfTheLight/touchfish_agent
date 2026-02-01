@@ -326,16 +326,18 @@ main_loop() {
   done
 }
 
-require_env AGENT_NAME GITHUB_TOKEN REPO_URL
+if [[ "${AGENT_LIBRARY_MODE:-}" != "1" ]]; then
+  require_env AGENT_NAME GITHUB_TOKEN REPO_URL
 
-WORKDIR=${WORKDIR:-/workspace}
-REPO_DIR=${REPO_DIR:-$WORKDIR/repo}
-STATE_DIR=${STATE_DIR:-$WORKDIR/.agent_state}
-POLL_INTERVAL=${POLL_INTERVAL:-60}
-CODEX_CMD=${CODEX_CMD:-codex}
-CODEX_SESSION_FILE=${CODEX_SESSION_FILE:-/codex/session.json}
+  WORKDIR=${WORKDIR:-/workspace}
+  REPO_DIR=${REPO_DIR:-$WORKDIR/repo}
+  STATE_DIR=${STATE_DIR:-$WORKDIR/.agent_state}
+  POLL_INTERVAL=${POLL_INTERVAL:-60}
+  CODEX_CMD=${CODEX_CMD:-codex}
+  CODEX_SESSION_FILE=${CODEX_SESSION_FILE:-/codex/session.json}
 
-mkdir -p "$WORKDIR" "$STATE_DIR"
+  mkdir -p "$WORKDIR" "$STATE_DIR"
 
-ensure_gh_auth
-main_loop
+  ensure_gh_auth
+  main_loop
+fi
