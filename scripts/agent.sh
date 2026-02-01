@@ -322,6 +322,12 @@ session_loop() {
 }
 
 compact_session() {
+  if command -v "$CODEX_CMD" >/dev/null 2>&1; then
+    log "Compacting codex session"
+    printf '/compact' | "$CODEX_CMD"
+    return
+  fi
+
   if [[ -n "${CODEX_COMPACT_CMD:-}" ]]; then
     log "Compacting codex session"
     $CODEX_COMPACT_CMD

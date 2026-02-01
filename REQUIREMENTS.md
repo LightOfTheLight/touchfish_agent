@@ -89,6 +89,8 @@ Supports:
     * Provide a command-line flag to disable running tests in container (default on)
     * Each test case should be in a separate file with clear input/expected variables
     * Treat `gh`/`git` as mocked inputs; treat `codex` as blackbox and verify full input prompts exactly as generated
+    * Test case for requirement changes must use mocked REQUIREMENTS content and mocked git diff output
+    * Test case for merged PR must verify `/compact` prompt is sent to codex
     * Covers scenarios:
         - Issue fix with multiple comments
         - Requirement changes

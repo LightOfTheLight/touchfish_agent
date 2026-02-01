@@ -108,6 +108,8 @@ setup_repo() {
 run_test_case() {
   local case_file="$1"
 
+  unset GIT_MOCK_DIFF
+
   # shellcheck source=/dev/null
   source "$case_file"
 

@@ -6,6 +6,12 @@ if [[ -n "${GIT_CALL_LOG:-}" ]]; then
 fi
 
 case "$1" in
+  diff)
+    if [[ -n "${GIT_MOCK_DIFF:-}" ]]; then
+      printf '%s' "$GIT_MOCK_DIFF"
+      exit 0
+    fi
+    ;;
   push)
     exit 0
     ;;

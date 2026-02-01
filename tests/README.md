@@ -41,5 +41,7 @@ docker rm "${container_id}"
 - The unit tests mock `gh` and `codex` via `tests/mocks`.
 - The unit tests mock `git` and `gh` to avoid network operations.
 - Codex is treated as a blackbox; tests verify the full prompt input recorded by the codex mock.
+- The requirement change test uses mocked REQUIREMENTS content and a mocked git diff output.
+- The merged PR test verifies the `/compact` prompt is sent to codex.
 - Each test case lives in `tests/cases` and declares input/expected variables.
 - Test data lives in `tests/data`.

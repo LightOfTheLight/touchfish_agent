@@ -17,6 +17,7 @@ run_case() {
   local codex_log="$TEST_TMP/codex_pr.log"
   export CODEX_PROMPT_LOG="$codex_log"
   export CODEX_OUTPUT_FILE="$TEST_TMP/pr_impl.txt"
+  export CODEX_CMD="codex"
 
   export AGENT_LIBRARY_MODE=1
   export AGENT_NAME="unit_agent"
@@ -30,8 +31,12 @@ run_case() {
 
   session_loop 55 "agent/unit_agent/test" "main"
 
-  if [[ -f "$codex_log" ]]; then
-    echo "Expected codex prompt not to run for merged PR" >&2
+  if [[ ! -f "$codex_log" ]]; then
+    echo "Expected codex prompt for compact not found" >&2
     return 1
   fi
+
+  local prompt
+  prompt=$(cat "$codex_log")
+  assert_equal "$prompt" "/compact"
 }
