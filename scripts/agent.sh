@@ -160,6 +160,9 @@ issue_fix_cycle() {
   local issue_number="$1"
   local pr_number="$2"
 
+  ensure_git_identity
+  ensure_git_credentials
+
   log "Fixing issue #$issue_number"
   gh issue edit "$issue_number" --add-label agent_fixing --remove-label agent_to_fix >/dev/null 2>&1 || true
 
@@ -216,6 +219,9 @@ implementing_cycle() {
   local last_sha="$1"
   shift
   local files=("$@")
+
+  ensure_git_identity
+  ensure_git_credentials
 
   log "Implementing requirement updates"
 
