@@ -12,8 +12,12 @@ run_in_container() {
 
   docker build -t touchfish_agent_test "$ROOT_DIR" >/dev/null
   docker run --rm \
+    --entrypoint /bin/bash \
     -e RUN_IN_CONTAINER=1 \
     -e TEST_REPORT="/work/tests/report.txt" \
+    -e AGENT_NAME="test_agent" \
+    -e GITHUB_TOKEN="test_token" \
+    -e REPO_URL="https://example.com/repo.git" \
     -v "$ROOT_DIR":/work \
     -w /work \
     touchfish_agent_test \

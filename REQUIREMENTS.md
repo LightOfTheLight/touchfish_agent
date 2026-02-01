@@ -82,6 +82,7 @@ Supports:
     * Mock `codex` command to varify agent prompt
     * Create one-time containers to run the test script and generate report
     * Test cases should be data driven, test data should be easy to understand
+    * Use mock values for required environment variables and avoid container entrypoint that expects real values
     * Covers scenarios:
         - Issue fix with multiple comments
         - Requirement changes
