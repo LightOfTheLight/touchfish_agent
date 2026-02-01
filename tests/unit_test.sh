@@ -16,8 +16,12 @@ run_in_container() {
     exit 1
   fi
 
+  local container_id
+  local local_report
+  local_report="$REPORT_PATH"
+
   docker build -t touchfish_agent_test "$ROOT_DIR" >/dev/null
-  docker run --rm \
+  container_id=$(docker create \
     --entrypoint /bin/bash \
     -e RUN_IN_CONTAINER=1 \
     -e TEST_REPORT="/work/tests/report.txt" \
@@ -25,10 +29,14 @@ run_in_container() {
     -e AGENT_NAME="test_agent" \
     -e GITHUB_TOKEN="test_token" \
     -e REPO_URL="https://example.com/repo.git" \
-    -v "$ROOT_DIR":/work \
-    -w /work \
     touchfish_agent_test \
-    /work/tests/unit_test.sh
+    /work/tests/unit_test.sh)
+
+  docker cp "$ROOT_DIR" "${container_id}:/work"
+  docker start -a "$container_id"
+  mkdir -p "$(dirname "$local_report")"
+  docker cp "${container_id}:/work/tests/report.txt" "$local_report" >/dev/null 2>&1 || true
+  docker rm "$container_id" >/dev/null
 }
 
 if [[ "${RUN_IN_CONTAINER:-}" != "1" ]]; then
@@ -100,9 +108,11 @@ case_issue_fix_multiple_comments() {
   git -C "$repo" push -u origin HEAD >/dev/null
 
   local gh_log="$TEST_TMP/gh_issue.log"
+  local git_log="$TEST_TMP/git_issue.log"
   local codex_log="$TEST_TMP/codex_issue.log"
 
   export GH_CALL_LOG="$gh_log"
+  export GIT_CALL_LOG="$git_log"
   export GH_MOCK_ISSUE_JSON="$ROOT_DIR/tests/data/issue_with_comments.json"
   export CODEX_PROMPT_LOG="$codex_log"
   export CODEX_OUTPUT_FILE="$repo/fix.txt"
@@ -125,6 +135,10 @@ case_issue_fix_multiple_comments() {
   local gh_calls
   gh_calls=$(cat "$gh_log")
   assert_contains "$gh_calls" "issue comment"
+
+  local git_calls
+  git_calls=$(cat "$git_log")
+  assert_contains "$git_calls" "git commit -m Aaron: fix issue #42"
 
   local prompt
   prompt=$(cat "$codex_log")
@@ -153,9 +167,11 @@ REQ
   echo "Updated requirements." >> "$repo/REQUIREMENTS.md"
 
   local codex_log="$TEST_TMP/codex_req.log"
+  local git_log="$TEST_TMP/git_req.log"
   export CODEX_PROMPT_LOG="$codex_log"
   export CODEX_OUTPUT_FILE="$repo/impl.txt"
   export CODEX_CMD="codex"
+  export GIT_CALL_LOG="$git_log"
 
   export AGENT_LIBRARY_MODE=1
   export AGENT_NAME="unit_agent"
@@ -175,6 +191,10 @@ REQ
   prompt=$(cat "$codex_log")
   assert_contains "$prompt" "Changed requirements diff:"
   assert_contains "$prompt" "+Updated requirements."
+
+  local git_calls
+  git_calls=$(cat "$git_log")
+  assert_contains "$git_calls" "git commit -m Aaron: implement requirement updates"
 }
 
 case_pr_merged() {

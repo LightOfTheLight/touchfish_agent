@@ -85,6 +85,7 @@ Supports:
     * Use mock values for required environment variables and avoid container entrypoint that expects real values
     * Print every command executed during unit tests for investigation
     * Provide a command-line flag to enable verbose unit test output (default off)
+    * Mock `git` to avoid network push during unit tests
     * Covers scenarios:
         - Issue fix with multiple comments
         - Requirement changes

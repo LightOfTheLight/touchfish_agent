@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${GIT_CALL_LOG:?GIT_CALL_LOG not set}"
+
+echo "git $*" >> "$GIT_CALL_LOG"
+
+case "$1" in
+  push)
+    exit 0
+    ;;
+  commit)
+    exit 0
+    ;;
+  config)
+    exit 0
+    ;;
+  remote)
+    if [[ "${2:-}" == "get-url" ]]; then
+      echo "https://github.com/example/repo.git"
+      exit 0
+    fi
+    exit 0
+    ;;
+  *)
+    # Fall back to real git for other commands.
+    command git "$@"
+    ;;
+esac
