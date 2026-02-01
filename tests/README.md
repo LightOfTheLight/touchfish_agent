@@ -40,6 +40,6 @@ docker rm "${container_id}"
 
 - The unit tests mock `gh` and `codex` via `tests/mocks`.
 - The unit tests mock `git` and `gh` to avoid network operations.
-- Codex is treated as a blackbox; tests only verify the prompt input recorded by the codex mock.
+- Codex is treated as a blackbox; tests verify the full prompt input recorded by the codex mock.
 - Each test case lives in `tests/cases` and declares input/expected variables.
 - Test data lives in `tests/data`.

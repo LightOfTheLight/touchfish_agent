@@ -2,7 +2,6 @@ TEST_NAME="Issue fix with multiple comments"
 
 INPUT_ISSUE_NUMBER=42
 INPUT_PR_NUMBER=101
-EXPECTED_COMMIT_MESSAGE="Aaron: fix issue #42"
 EXPECTED_PROMPT_TITLE="Fix incorrect prompt handling"
 EXPECTED_PROMPT_COMMENT="First comment with extra context."
 
@@ -37,6 +36,21 @@ run_case() {
 
   local prompt
   prompt=$(cat "$codex_log")
-  assert_contains "$prompt" "$EXPECTED_PROMPT_TITLE"
-  assert_contains "$prompt" "$EXPECTED_PROMPT_COMMENT"
+
+  local expected_prompt
+  expected_prompt=$(
+    cat <<EOF
+You are an automated coding agent. Fix the issue below in this repository.
+
+Issue: $EXPECTED_PROMPT_TITLE
+
+The agent fails to include context in its prompt.
+
+Comments:
+- alice: $EXPECTED_PROMPT_COMMENT
+- bob: Second comment with more details.
+EOF
+  )
+
+  assert_equal "$prompt" "$expected_prompt"
 }

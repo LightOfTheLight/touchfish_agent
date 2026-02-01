@@ -1,8 +1,6 @@
 TEST_NAME="Requirement changes"
 
 INPUT_CHANGE_LINE="Updated requirements."
-EXPECTED_PROMPT_DIFF="+Updated requirements."
-
 run_case() {
   local repo="$TEST_TMP/repo_req"
   local remote="$TEST_TMP/remote_req.git"
@@ -40,6 +38,24 @@ REQ
 
   local prompt
   prompt=$(cat "$codex_log")
-  assert_contains "$prompt" "Changed requirements diff:"
-  assert_contains "$prompt" "$EXPECTED_PROMPT_DIFF"
+
+  local diff_output
+  diff_output=$(git -C "$repo" diff "$last_sha..HEAD" -- "$repo/REQUIREMENTS.md")
+
+  local expected_prompt
+  expected_prompt=$(
+    cat <<EOF
+You are an automated coding agent. Implement the latest requirements for this repository.
+
+Changed requirements diff:
+$diff_output
+
+Current requirements files:
+
+----- $repo/REQUIREMENTS.md -----
+$(cat "$repo/REQUIREMENTS.md")
+EOF
+  )
+
+  assert_equal "$prompt" "$expected_prompt"
 }

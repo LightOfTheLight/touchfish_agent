@@ -84,6 +84,15 @@ assert_contains() {
   fi
 }
 
+assert_equal() {
+  local actual="$1"
+  local expected="$2"
+  if [[ "$actual" != "$expected" ]]; then
+    echo "Expected full prompt mismatch" >&2
+    return 1
+  fi
+}
+
 setup_repo() {
   local repo="$1"
   local remote="$2"
