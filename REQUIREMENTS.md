@@ -88,6 +88,7 @@ Supports:
     * Mock `git` to avoid network push during unit tests
     * Provide a command-line flag to disable running tests in container (default on)
     * Each test case should be in a separate file with clear input/expected variables
+    * Treat `gh`/`git` as mocked inputs; treat `codex` as blackbox and verify only its input prompts
     * Covers scenarios:
         - Issue fix with multiple comments
         - Requirement changes

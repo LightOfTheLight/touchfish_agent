@@ -1,7 +1,5 @@
 TEST_NAME="PR merged"
 
-EXPECTED_COMPACT_MARKER="compacted"
-
 run_case() {
   local repo="$TEST_TMP/repo_pr"
   local remote="$TEST_TMP/remote_pr.git"
@@ -16,15 +14,9 @@ run_case() {
   export GH_CALL_LOG="$gh_log"
   export GH_PR_MERGED=true
 
-  local compact_log="$TEST_TMP/compact.log"
-  local compact_script="$TEST_TMP/compact.sh"
-  cat <<'SH' > "$compact_script"
-#!/usr/bin/env bash
-set -euo pipefail
-echo "compacted" >> "$1"
-SH
-  chmod +x "$compact_script"
-  export CODEX_COMPACT_CMD="$compact_script $compact_log"
+  local codex_log="$TEST_TMP/codex_pr.log"
+  export CODEX_PROMPT_LOG="$codex_log"
+  export CODEX_OUTPUT_FILE="$TEST_TMP/pr_impl.txt"
 
   export AGENT_LIBRARY_MODE=1
   export AGENT_NAME="unit_agent"
@@ -38,13 +30,8 @@ SH
 
   session_loop 55 "agent/unit_agent/test" "main"
 
-  if [[ ! -f "$compact_log" ]]; then
-    echo "Expected compact log not created" >&2
-    return 1
-  fi
-
-  if ! grep -q "$EXPECTED_COMPACT_MARKER" "$compact_log"; then
-    echo "Expected compact marker not found" >&2
+  if [[ -f "$codex_log" ]]; then
+    echo "Expected codex prompt not to run for merged PR" >&2
     return 1
   fi
 }
