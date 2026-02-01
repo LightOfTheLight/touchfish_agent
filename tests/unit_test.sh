@@ -3,6 +3,12 @@ set -euo pipefail
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 REPORT_PATH=${TEST_REPORT:-"$ROOT_DIR/tests/report.txt"}
+VERBOSE=${UNIT_TEST_VERBOSE:-0}
+
+if [[ "${1:-}" == "--verbose" ]]; then
+  VERBOSE=1
+  shift
+fi
 
 run_in_container() {
   if ! command -v docker >/dev/null 2>&1; then
@@ -15,6 +21,7 @@ run_in_container() {
     --entrypoint /bin/bash \
     -e RUN_IN_CONTAINER=1 \
     -e TEST_REPORT="/work/tests/report.txt" \
+    -e UNIT_TEST_VERBOSE="$VERBOSE" \
     -e AGENT_NAME="test_agent" \
     -e GITHUB_TOKEN="test_token" \
     -e REPO_URL="https://example.com/repo.git" \
@@ -35,8 +42,10 @@ TEST_TMP=$(mktemp -d)
 mkdir -p "$(dirname "$REPORT_PATH")"
 : > "$REPORT_PATH"
 exec > >(tee -a "$REPORT_PATH") 2>&1
-export PS4='+ ${BASH_SOURCE##*/}:${LINENO}: '
-set -x
+if [[ "$VERBOSE" == "1" ]]; then
+  export PS4='+ ${BASH_SOURCE##*/}:${LINENO}: '
+  set -x
+fi
 
 cleanup() {
   rm -rf "$TEST_TMP"
