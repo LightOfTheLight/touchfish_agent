@@ -21,6 +21,7 @@ Optional values:
 - `POLL_INTERVAL`: seconds between checks (default: 60).
 - `CODEX_CMD`: codex CLI command inside the container (default: `codex`).
 - `CODEX_API_KEY` / `OPENAI_API_KEY`: set the environment variable required by your codex CLI.
+- `AGENT_GIT_NAME` / `AGENT_GIT_EMAIL`: git author identity used for commits (defaults to `<AGENT_NAME> bot` and `<AGENT_NAME>@example.com`).
 
 ## 2) Create tokens
 

@@ -15,6 +15,8 @@ services:
       POLL_INTERVAL: ${POLL_INTERVAL:-60}
       CODEX_API_KEY: ${CODEX_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AGENT_GIT_NAME: ${AGENT_GIT_NAME:-}
+      AGENT_GIT_EMAIL: ${AGENT_GIT_EMAIL:-}
     volumes:
       - ${WORKSPACE_DIR}:/workspace
       - ${CODEX_SESSION_FILE}:/codex/session.json

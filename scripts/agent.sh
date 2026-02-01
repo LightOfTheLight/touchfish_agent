@@ -24,6 +24,22 @@ ensure_gh_auth() {
   gh auth setup-git >/dev/null
 }
 
+ensure_git_identity() {
+  local name="${AGENT_GIT_NAME:-${AGENT_NAME} bot}"
+  local email="${AGENT_GIT_EMAIL:-${AGENT_NAME}@example.com}"
+
+  git config user.name "$name"
+  git config user.email "$email"
+}
+
+ensure_git_credentials() {
+  if [[ "$REPO_URL" == https://* ]]; then
+    local token_url
+    token_url="${REPO_URL/https:\/\//https:\/\/${GITHUB_TOKEN}@}"
+    git remote set-url origin "$token_url"
+  fi
+}
+
 ensure_repo() {
   if [[ ! -d "$REPO_DIR/.git" ]]; then
     log "Cloning repo $REPO_URL"
@@ -301,6 +317,9 @@ main_loop() {
   while true; do
     ensure_repo
     cd "$REPO_DIR"
+
+    ensure_git_identity
+    ensure_git_credentials
 
     git fetch origin >/dev/null 2>&1 || true
 
