@@ -96,165 +96,31 @@ setup_repo() {
   git -C "$repo" remote add origin "$remote"
 }
 
-run_test() {
-  local name="$1"
-  shift
+run_test_case() {
+  local case_file="$1"
 
-  if "$@"; then
-    log_report "PASS: $name"
+  # shellcheck source=/dev/null
+  source "$case_file"
+
+  if [[ -z "${TEST_NAME:-}" || -z "${run_case:-}" ]]; then
+    log_report "FAIL: invalid test case $case_file"
+    return 1
+  fi
+
+  if run_case; then
+    log_report "PASS: $TEST_NAME"
   else
-    log_report "FAIL: $name"
+    log_report "FAIL: $TEST_NAME"
     return 1
   fi
 }
 
-case_issue_fix_multiple_comments() {
-  local repo="$TEST_TMP/repo_issue"
-  local remote="$TEST_TMP/remote_issue.git"
-  setup_repo "$repo" "$remote"
-
-  echo "base" > "$repo/file.txt"
-  git -C "$repo" add file.txt
-  git -C "$repo" commit -m "base" >/dev/null
-  git -C "$repo" push -u origin HEAD >/dev/null
-
-  local gh_log="$TEST_TMP/gh_issue.log"
-  local git_log="$TEST_TMP/git_issue.log"
-  local codex_log="$TEST_TMP/codex_issue.log"
-
-  export GH_CALL_LOG="$gh_log"
-  export GIT_CALL_LOG="$git_log"
-  export GH_MOCK_ISSUE_JSON="$ROOT_DIR/tests/data/issue_with_comments.json"
-  export CODEX_PROMPT_LOG="$codex_log"
-  export CODEX_OUTPUT_FILE="$repo/fix.txt"
-
-  export AGENT_LIBRARY_MODE=1
-  export AGENT_NAME="unit_agent"
-  export GITHUB_TOKEN="dummy"
-  export REPO_URL="file://$remote"
-  export CODEX_CMD="codex"
-
-  # shellcheck source=/dev/null
-  source "$ROOT_DIR/scripts/agent.sh"
-
-  (cd "$repo" && issue_fix_cycle 42 101)
-
-  local last_msg
-  last_msg=$(git -C "$repo" log -1 --pretty=%B)
-  assert_contains "$last_msg" "Aaron: fix issue #42"
-
-  local gh_calls
-  gh_calls=$(cat "$gh_log")
-  assert_contains "$gh_calls" "issue comment"
-
-  local git_calls
-  git_calls=$(cat "$git_log")
-  assert_contains "$git_calls" "git commit -m Aaron: fix issue #42"
-
-  local prompt
-  prompt=$(cat "$codex_log")
-  assert_contains "$prompt" "Fix incorrect prompt handling"
-  assert_contains "$prompt" "First comment with extra context."
-}
-
-case_requirement_changes() {
-  local repo="$TEST_TMP/repo_req"
-  local remote="$TEST_TMP/remote_req.git"
-  setup_repo "$repo" "$remote"
-
-  cat <<'REQ' > "$repo/REQUIREMENTS.md"
-# Requirements
-
-Initial requirements.
-REQ
-
-  git -C "$repo" add REQUIREMENTS.md
-  git -C "$repo" commit -m "base" >/dev/null
-  git -C "$repo" push -u origin HEAD >/dev/null
-
-  local last_sha
-  last_sha=$(git -C "$repo" rev-parse HEAD)
-
-  echo "Updated requirements." >> "$repo/REQUIREMENTS.md"
-
-  local codex_log="$TEST_TMP/codex_req.log"
-  local git_log="$TEST_TMP/git_req.log"
-  export CODEX_PROMPT_LOG="$codex_log"
-  export CODEX_OUTPUT_FILE="$repo/impl.txt"
-  export CODEX_CMD="codex"
-  export GIT_CALL_LOG="$git_log"
-
-  export AGENT_LIBRARY_MODE=1
-  export AGENT_NAME="unit_agent"
-  export GITHUB_TOKEN="dummy"
-  export REPO_URL="file://$remote"
-
-  # shellcheck source=/dev/null
-  source "$ROOT_DIR/scripts/agent.sh"
-
-  (cd "$repo" && implementing_cycle "$last_sha" "$repo/REQUIREMENTS.md")
-
-  local last_msg
-  last_msg=$(git -C "$repo" log -1 --pretty=%B)
-  assert_contains "$last_msg" "Aaron: implement requirement updates"
-
-  local prompt
-  prompt=$(cat "$codex_log")
-  assert_contains "$prompt" "Changed requirements diff:"
-  assert_contains "$prompt" "+Updated requirements."
-
-  local git_calls
-  git_calls=$(cat "$git_log")
-  assert_contains "$git_calls" "git commit -m Aaron: implement requirement updates"
-}
-
-case_pr_merged() {
-  local repo="$TEST_TMP/repo_pr"
-  local remote="$TEST_TMP/remote_pr.git"
-  setup_repo "$repo" "$remote"
-
-  echo "base" > "$repo/file.txt"
-  git -C "$repo" add file.txt
-  git -C "$repo" commit -m "base" >/dev/null
-  git -C "$repo" push -u origin HEAD >/dev/null
-
-  local gh_log="$TEST_TMP/gh_pr.log"
-  export GH_CALL_LOG="$gh_log"
-  export GH_PR_MERGED=true
-
-  local compact_log="$TEST_TMP/compact.log"
-  local compact_script="$TEST_TMP/compact.sh"
-  cat <<'SH' > "$compact_script"
-#!/usr/bin/env bash
-set -euo pipefail
-echo "compacted" >> "$1"
-SH
-  chmod +x "$compact_script"
-  export CODEX_COMPACT_CMD="$compact_script $compact_log"
-
-  export AGENT_LIBRARY_MODE=1
-  export AGENT_NAME="unit_agent"
-  export GITHUB_TOKEN="dummy"
-  export REPO_URL="file://$remote"
-  export REPO_DIR="$repo"
-  export POLL_INTERVAL=1
-
-  # shellcheck source=/dev/null
-  source "$ROOT_DIR/scripts/agent.sh"
-
-  session_loop 55 "agent/unit_agent/test" "main"
-
-  if [[ ! -f "$compact_log" ]]; then
-    echo "Expected compact log not created" >&2
-    return 1
-  fi
-}
 
 failures=0
 
-run_test "Issue fix with multiple comments" case_issue_fix_multiple_comments || failures=$((failures+1))
-run_test "Requirement changes" case_requirement_changes || failures=$((failures+1))
-run_test "PR merged" case_pr_merged || failures=$((failures+1))
+for case_file in "$ROOT_DIR/tests/cases/"*.sh; do
+  run_test_case "$case_file" || failures=$((failures+1))
+done
 
 if [[ $failures -ne 0 ]]; then
   log_report "FAILED: $failures test(s) failed"

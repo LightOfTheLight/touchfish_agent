@@ -40,4 +40,5 @@ docker rm "${container_id}"
 
 - The unit tests mock `gh` and `codex` via `tests/mocks`.
 - The unit tests mock `git` to avoid network push.
+- Each test case lives in `tests/cases` and declares input/expected variables.
 - Test data lives in `tests/data`.
