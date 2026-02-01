@@ -52,6 +52,9 @@ if [[ "${RUN_IN_CONTAINER:-}" != "1" ]]; then
   fi
 fi
 
+GIT_REAL_BIN=$(command -v git)
+export GIT_REAL_BIN
+export GIT_CALL_LOG=${GIT_CALL_LOG:-"$ROOT_DIR/tests/git_calls.log"}
 PATH="$ROOT_DIR/tests/mocks:$PATH"
 
 TEST_TMP=$(mktemp -d)

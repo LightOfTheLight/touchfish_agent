@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${GIT_CALL_LOG:?GIT_CALL_LOG not set}"
-
-echo "git $*" >> "$GIT_CALL_LOG"
+if [[ -n "${GIT_CALL_LOG:-}" ]]; then
+  echo "git $*" >> "$GIT_CALL_LOG"
+fi
 
 case "$1" in
   push)
@@ -24,6 +24,10 @@ case "$1" in
     ;;
   *)
     # Fall back to real git for other commands.
-    command git "$@"
+    if [[ -n "${GIT_REAL_BIN:-}" ]]; then
+      "$GIT_REAL_BIN" "$@"
+    else
+      command git "$@"
+    fi
     ;;
 esac
