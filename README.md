@@ -17,39 +17,29 @@ An AI workflow to leverage on Github eco-systems, so that:
 - A container host with physical storage for workspaces
 - Containers for agent runtime
 - Access to Github
-- AI code agent(`codex`, `claude code`)
+- AI code agent(`claude code`)
+
+## Agent requirements
+
+- There shall be one agent folder which documents down agent behavior, comments and historys
+- There shall be 5 agent types: 
+    > - PO: who will be responsible for requierment and overall project guideline. It will read and understand the basic requirement from README.md from user input and generate project level requirement to REQUIREMENT.md
+    > - DEV: who will be responsible for the actual implementation based on REQUIREMENT.md
+    > - TESTER: who will be responsible for the test cases based on REQUIREMENT.md
 
 ## Workflow
 
 ### Session start
-1. User clone project to host workspaces folder.
-1. Start agent containers in project folder, with set agent name.
-1. Agent periodically scan for branch name matches `agent/<agent_name>/*`
-1. Check out the first match, start the session
+1. User commit requirement in README.md. the commit message will contain the next agent
+1. The github action will be triggered to start the containers in project folder with mentioned agent name 
+1. The container shall first pull the latest code based on the github action.
+1. The container shall start one claude code based on agent name, init the session with agent folder with agent name
 
 ### Session process
-
-1. Agent create PR to `master` once session started
-1. User describe requirements by updating the requirements markdown files and commit
-1. User create issues for agent implementation issues and defects that want to fix in this session. Label the issue with `Agent to fix`, and tag this branch name in description.
-
-#### Session cycles
-
-##### Issue fixing cycles
-1. Agent scans the issues with `Agent to fix` label and current PR is mentioned in the description
-1. Update label to `Agent fixing` for the first issue found.
-1. Agent to fix this issue, commit with proper descriptions
-1. Update the issue label to `Agent fixed to be verified`
-1. End this cycle
-
-#### implementation cycles
-1. Agent watches the commits on this branch if no issues matches, and take the diff of requirements as requirements for this session
-1. Agent implement the requirements, commit with proper descriptions
-
-#### ending the cycle
-1. Agent or github action triggers CI/CD
-1. Agent updates the PR
-1. Move to next cycle
+1. Agent shall read through the agent folder to understand its role
+1. Agent shall read the commit message to understand the changes
+1. Agent shall update the project folder based on its role and given new task in the commit
+1. Agent shall update the PR to with necessary changes.
 
 ### Session exits
 
