@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: touchfish-agent:latest
+    volumes:
+      - .:/workspace
+      - ${HOME}/.claude:/root/.claude
+    environment:
+      - AGENT_NAME=${AGENT_NAME:-DEV}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - COMMIT_MESSAGE=${COMMIT_MESSAGE:-"Local development session"}
+      - BRANCH_NAME=${BRANCH_NAME:-dev}
+      - REPO_NAME=${REPO_NAME:-local/touchfish-agent}
+    working_dir: /workspace
+
+  # Development shell for debugging
+  shell:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: touchfish-agent:latest
+    volumes:
+      - .:/workspace
+      - ${HOME}/.claude:/root/.claude
+    environment:
+      - AGENT_NAME=${AGENT_NAME:-DEV}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    working_dir: /workspace
+    entrypoint: /bin/bash
+    stdin_open: true
+    tty: true
