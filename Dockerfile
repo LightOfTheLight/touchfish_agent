@@ -35,6 +35,7 @@ USER agent
 # Environment variables (to be overridden at runtime)
 ENV AGENT_NAME=""
 ENV GITHUB_TOKEN=""
+ENV CLAUDE_CODE_OAUTH_TOKEN=""
 ENV COMMIT_SHA=""
 ENV COMMIT_MESSAGE=""
 ENV BRANCH_NAME=""

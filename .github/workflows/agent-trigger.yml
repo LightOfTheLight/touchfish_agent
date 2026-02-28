@@ -77,7 +77,7 @@ jobs:
             -v "$GITHUB_WORKSPACE:/workspace" \
             -e AGENT_NAME="${{ env.AGENT_NAME }}" \
             -e GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
-            -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
+            -e CLAUDE_CODE_OAUTH_TOKEN="${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}" \
             -e COMMIT_SHA="${{ steps.commit.outputs.sha }}" \
             -e COMMIT_MESSAGE="${{ steps.commit.outputs.message }}" \
             -e BRANCH_NAME="${{ steps.commit.outputs.branch }}" \

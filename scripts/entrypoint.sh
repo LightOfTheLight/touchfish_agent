@@ -39,9 +39,9 @@ validate_env() {
         exit 1
     fi
 
-    # Check for Anthropic API key (required for Claude Code)
-    if [[ -z "$ANTHROPIC_API_KEY" ]] && [[ ! -f "$HOME/.claude/credentials" ]]; then
-        log_warn "ANTHROPIC_API_KEY not set and no credentials file found"
+    # Check for authentication (OAuth token or API key)
+    if [[ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]] && [[ -z "$ANTHROPIC_API_KEY" ]]; then
+        log_warn "Neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY is set"
         log_warn "Claude Code may fail to authenticate"
     fi
 }
