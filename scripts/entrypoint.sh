@@ -103,16 +103,8 @@ run_agent() {
     # The --dangerously-skip-permissions flag is needed for automated execution
     cd /workspace
 
-    # Verify workspace is writable
-    if touch /workspace/.write-test 2>/dev/null; then
-        rm -f /workspace/.write-test
-        log_info "Workspace is writable"
-    else
-        log_error "Workspace is NOT writable - file changes will be lost"
-    fi
-
     # Run with timeout (30 minutes max) and max turns limit
-    timeout 1800 claude -p --dangerously-skip-permissions --verbose --max-turns 50 "$prompt"
+    timeout 1800 claude -p --dangerously-skip-permissions --max-turns 50 "$prompt"
 }
 
 # Main execution
