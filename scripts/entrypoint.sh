@@ -99,12 +99,12 @@ run_agent() {
     prompt=$(build_agent_prompt)
 
     # Run Claude Code with the agent prompt
-    # The --print flag outputs results without interactive mode
+    # The -p flag runs in non-interactive mode with tool execution
     # The --dangerously-skip-permissions flag is needed for automated execution
     cd /workspace
 
     # Run with timeout (30 minutes max) and max turns limit
-    timeout 1800 claude --print --dangerously-skip-permissions --max-turns 50 "$prompt"
+    timeout 1800 claude -p --dangerously-skip-permissions --max-turns 50 "$prompt"
 }
 
 # Main execution
