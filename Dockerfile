@@ -18,19 +18,12 @@ RUN apt-get update && apt-get install -y \
 # Install Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
 
-# Create non-root user (Claude Code refuses --dangerously-skip-permissions as root)
-RUN useradd -m -s /bin/bash agent
-
 # Create workspace directory
 WORKDIR /workspace
-RUN chown agent:agent /workspace
 
 # Copy entrypoint script
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# Switch to non-root user
-USER agent
 
 # Environment variables (to be overridden at runtime)
 ENV AGENT_NAME=""
