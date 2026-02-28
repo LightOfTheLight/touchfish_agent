@@ -105,16 +105,21 @@ jobs:
       - name: Push changes to temp branch
         id: push
         run: |
+          # Stage and commit any remaining unstaged changes
           git add -A
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          else
+          if ! git diff --staged --quiet; then
             git commit -m "Agent ${{ env.AGENT_NAME }} session completed
 
             Co-Authored-By: TouchFish Agent <agent@touchfish.local>"
+          fi
+
+          # Check if agent made any commits (staged or via Claude Code)
+          if git log --oneline ${{ github.ref_name }}..${{ steps.temp-branch.outputs.temp_branch }} | grep -q .; then
             git push origin "${{ steps.temp-branch.outputs.temp_branch }}"
             echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes to push"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
   create-pr:
