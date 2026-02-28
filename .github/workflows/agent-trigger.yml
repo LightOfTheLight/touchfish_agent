@@ -42,7 +42,7 @@ jobs:
   run-agent:
     needs: parse-trigger
     if: needs.parse-trigger.outputs.should_run == 'true'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     env:
       AGENT_NAME: ${{ needs.parse-trigger.outputs.agent_name }}
     steps:
@@ -67,11 +67,14 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
           echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
+      - name: Build Agent Docker Image
+        run: |
+          docker build -t ${{ env.AGENT_IMAGE }} .
+
       - name: Run Agent Container
         run: |
           docker run --rm \
             -v "$GITHUB_WORKSPACE:/workspace" \
-            -v "$HOME/.claude:/root/.claude" \
             -e AGENT_NAME="${{ env.AGENT_NAME }}" \
             -e GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
             -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
