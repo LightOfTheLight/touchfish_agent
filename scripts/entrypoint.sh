@@ -55,7 +55,7 @@ configure_git() {
 
     # Configure credential helper for GitHub
     git config --global credential.helper store
-    echo "https://x-access-token:${GITHUB_TOKEN}@github.com" > ~/.git-credentials
+    echo "https://x-access-token:${GITHUB_TOKEN}@github.com" > "$HOME/.git-credentials"
 }
 
 # Build the agent prompt based on agent type
