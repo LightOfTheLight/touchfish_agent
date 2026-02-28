@@ -264,6 +264,7 @@ Created `docs/SETUP.md` covering:
 | 2026-02-05 | 002 | Implemented core infrastructure: TESTER agent, GitHub Actions, Dockerfile, entrypoint script |
 | 2026-02-05 | 003 | Created docs/SETUP.md with comprehensive setup guide |
 | 2026-02-05 | 004 | Code review and bug fixes |
+| 2026-02-28 | 005 | Project status review; updated docs/SETUP.md to reflect cloud runners and OAuth auth |
 
 ---
 
@@ -304,6 +305,79 @@ Created `docs/SETUP.md` covering:
 #### Verification
 
 All MVP criteria remain satisfied. Implementation is now production-ready.
+
+---
+
+### Session 005 - Project Status Review & Documentation Update
+**Date:** 2026-02-28
+**Trigger:** Review REQUIREMENT.md and update DEV agent history with current project status @DEV
+**Task:** Review current project state and update documentation to match actual implementation
+
+#### Analysis Process
+
+1. **Reviewed REQUIREMENT.md**
+   - All MVP criteria have been addressed
+   - System is functional (this very session was triggered by the workflow)
+
+2. **Reviewed Git History**
+   - Identified series of bug fixes applied since initial implementation:
+
+   | Commit | Change |
+   |--------|--------|
+   | `e22f031` | fix(agent): use -p flag instead of --print to enable file modifications |
+   | `2065228` | fix(ci): run container as host user to fix volume write permissions |
+   | `848d51a` | feat(ci): switch run-agent job from self-hosted to cloud-hosted runner |
+   | `3e07093` | feat(ci): switch to OAuth token auth for Claude Pro subscription |
+   | `33476e0` | debug(agent): add workspace write test and verbose flag to Claude Code |
+   | `8c564dc` | fix(ci): detect agent commits when checking for changes to push |
+
+3. **Documentation Gap Identified**
+   - `docs/SETUP.md` still referenced self-hosted runners and `ANTHROPIC_API_KEY`
+   - Actual implementation uses cloud-hosted runners and `CLAUDE_CODE_OAUTH_TOKEN`
+
+#### Changes Made
+
+| File | Change |
+|------|--------|
+| `docs/SETUP.md` | Updated to reflect cloud runners, OAuth token auth, correct docker run flags |
+
+#### Current MVP Status
+
+| Criteria | Status |
+|----------|--------|
+| PO agent can read README.md and generate REQUIREMENT.md | Complete |
+| DEV agent can read REQUIREMENT.md and create implementation | Complete |
+| TESTER agent can read REQUIREMENT.md and create test cases | Complete |
+| GitHub Action triggers correct agent based on commit message | Complete (cloud runners) |
+| All agent actions are recorded as git commits | Complete |
+| PR workflow completes successfully | Complete |
+
+#### System Architecture (Current)
+
+```
+User Commit (@AGENT on any non-master branch)
+        ↓
+GitHub Action (ubuntu-latest cloud runner)
+        ↓
+Parse agent name from commit message
+        ↓
+Create temp branch: agent/{AGENT}/{TIMESTAMP}
+        ↓
+Build Docker image from Dockerfile
+        ↓
+Run container as host user with workspace mounted
+  - env: CLAUDE_CODE_OAUTH_TOKEN
+  - flags: -p --dangerously-skip-permissions --verbose --max-turns 50
+        ↓
+Push temp branch + Create PR to source branch
+```
+
+#### Technical Notes
+
+- Container runs as host user (`--user $(id -u):$(id -g)`) to fix volume write permissions
+- Claude Code uses OAuth token (not API key) for Claude Pro subscription
+- 30-minute timeout prevents runaway sessions
+- Workspace write test in entrypoint.sh aids debugging
 
 ---
 
