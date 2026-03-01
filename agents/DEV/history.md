@@ -265,6 +265,7 @@ Created `docs/SETUP.md` covering:
 | 2026-02-05 | 003 | Created docs/SETUP.md with comprehensive setup guide |
 | 2026-02-05 | 004 | Code review and bug fixes |
 | 2026-02-28 | 005 | Project status review; updated docs/SETUP.md to reflect cloud runners and OAuth auth |
+| 2026-03-01 | 006 | Fixed architecture diagram; created tests/ suite; fixed docker-compose user/home mount; fixed entrypoint.sh executable bit |
 
 ---
 
@@ -378,6 +379,73 @@ Push temp branch + Create PR to source branch
 - Claude Code uses OAuth token (not API key) for Claude Pro subscription
 - 30-minute timeout prevents runaway sessions
 - Workspace write test in entrypoint.sh aids debugging
+
+---
+
+### Session 006 - Tests, Fixes & Documentation Accuracy
+**Date:** 2026-03-01
+**Trigger:** Merge of PR #2 (Session 005); new DEV session
+**Task:** Review current state, improve quality, add test coverage
+
+#### Analysis Process
+
+1. **Reviewed Previous Sessions**
+   - All MVP criteria were met as of Session 005
+   - Identified three areas for improvement from code review
+
+2. **Issues Found**
+
+   | Issue | Location | Severity | Status |
+   |-------|----------|----------|--------|
+   | Architecture diagram shows "Self-hosted Runner" | `docs/SETUP.md:178-179` | Low | Fixed |
+   | `docker-compose.yml` mounts `/root/.claude` (wrong for non-root user) | `docker-compose.yml:11,28` | Medium | Fixed |
+   | `scripts/entrypoint.sh` not marked executable in git (mode 644) | git index | Low | Fixed |
+   | No test suite existed | — | Medium | Fixed |
+
+#### Changes Made
+
+##### 1. `docs/SETUP.md`
+- Fixed architecture diagram: "Self-hosted Runner" → "Cloud Runner (ubuntu-latest)"
+- Renamed "Container Host" label → "Cloud Runner Environment" to match actual setup
+- Updated manual docker run example to use `$(pwd)/tmp/agent-home` instead of `/tmp/agent-home`
+- Added docker-compose local development instructions (section 4.1.1)
+- Updated last-modified date
+
+##### 2. `docker-compose.yml`
+- Added `user: "${UID:-1000}:${GID:-1000}"` to both services (matches CI)
+- Changed volume mount from `${HOME}/.claude:/root/.claude` → `./tmp/agent-home:/home/agent`
+- Added `HOME=/home/agent` environment variable
+- Added `CLAUDE_CODE_OAUTH_TOKEN` and `ANTHROPIC_API_KEY` to environment (pass-through)
+- Result: local dev setup now mirrors CI environment
+
+##### 3. `scripts/entrypoint.sh`
+- Fixed git file mode from 644 → 755 (executable) via `git update-index --chmod=+x`
+- Dockerfile already did `chmod +x` inside container, but the repo file was wrong
+
+##### 4. `tests/` directory (new)
+
+Created three test scripts and a test runner:
+
+| File | Tests | Purpose |
+|------|-------|---------|
+| `tests/validate_agents.sh` | 30 | Agent folder structure, required files, required sections |
+| `tests/validate_workflow.sh` | 12 | GitHub Actions workflow integrity and security |
+| `tests/validate_entrypoint.sh` | 21 | Entrypoint script structure and safety checks |
+| `tests/run_all.sh` | — | Runs all three suites, reports aggregate results |
+
+All 63 tests pass.
+
+#### Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| Static analysis tests (grep/stat) vs runtime tests | Cannot run Claude Code in test environment; static tests verify structure and correctness |
+| Tests in `tests/` directory | Consistent with TESTER.md file ownership guidelines |
+| docker-compose uses `./tmp/agent-home` not `/tmp` | Project-local temp dir, already gitignored, avoids polluting system `/tmp` |
+
+#### MVP Status (unchanged)
+
+All criteria remain complete. No regressions introduced.
 
 ---
 

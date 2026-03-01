@@ -66,11 +66,14 @@ cat ~/.claude/.credentials.json
 ### 4.1 Manual Container Test
 
 ```bash
+# Create local agent home directory (one-time setup)
+mkdir -p tmp/agent-home
+
 # Test container startup
 docker run --rm \
   --user "$(id -u):$(id -g)" \
   -v $(pwd):/workspace \
-  -v /tmp/agent-home:/home/agent \
+  -v $(pwd)/tmp/agent-home:/home/agent \
   -e HOME=/home/agent \
   -e AGENT_NAME=DEV \
   -e GITHUB_TOKEN=test \
@@ -81,7 +84,27 @@ docker run --rm \
   touchfish-agent:latest echo "Container works!"
 ```
 
-> **Note:** The `--user` flag and `-v /tmp/agent-home:/home/agent` are required so the container runs as your host user and can write to the mounted workspace volume.
+> **Note:** The `--user` flag and agent-home volume mount are required so the container runs as your host user and can write to the mounted workspace. The `tmp/` directory is gitignored.
+
+### 4.1.1 Using docker-compose for local development
+
+```bash
+# Create agent home directory (one-time setup)
+mkdir -p tmp/agent-home
+
+# Set required environment variables
+export AGENT_NAME=DEV
+export GITHUB_TOKEN=your_github_token
+export CLAUDE_CODE_OAUTH_TOKEN=your_oauth_token
+export COMMIT_MESSAGE="@DEV Test local agent run"
+export BRANCH_NAME=dev/local-test
+
+# Run the agent
+docker-compose run agent
+
+# Or open a debug shell
+docker-compose run shell
+```
 
 ### 4.2 Workflow Test
 
@@ -175,13 +198,13 @@ If the agent cannot write to the workspace, ensure the `run-agent` job passes `-
 ┌─────────────────────────────────────────────────────────┐
 │                      GitHub                              │
 │  ┌──────────┐    ┌──────────┐    ┌──────────────────┐  │
-│  │  Branch  │───→│  Action  │───→│  Self-hosted     │  │
-│  │  Push    │    │  Trigger │    │  Runner          │  │
+│  │  Branch  │───→│  Action  │───→│  Cloud Runner    │  │
+│  │  Push    │    │  Trigger │    │  (ubuntu-latest) │  │
 │  └──────────┘    └──────────┘    └────────┬─────────┘  │
 └───────────────────────────────────────────┼─────────────┘
                                             │
                     ┌───────────────────────▼───────────────┐
-                    │         Container Host                 │
+                    │      Cloud Runner Environment          │
                     │  ┌─────────────────────────────────┐  │
                     │  │     touchfish-agent:latest      │  │
                     │  │  ┌───────────────────────────┐  │  │
@@ -206,4 +229,4 @@ If the agent cannot write to the workspace, ensure the `run-agent` job passes `-
 ---
 
 *Document maintained by: DEV Agent*
-*Last updated: 2026-02-28*
+*Last updated: 2026-03-01*
