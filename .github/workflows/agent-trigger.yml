@@ -7,7 +7,8 @@ on:
       - main
 
 env:
-  AGENT_IMAGE: touchfish-agent:latest
+  REGISTRY: ghcr.io
+  AGENT_IMAGE: ghcr.io/lightofthelight/touchfish-agent:latest
 
 jobs:
   parse-trigger:
@@ -43,6 +44,9 @@ jobs:
     needs: parse-trigger
     if: needs.parse-trigger.outputs.should_run == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
     outputs:
       temp_branch: ${{ steps.temp-branch.outputs.temp_branch }}
       has_changes: ${{ steps.push.outputs.has_changes }}
@@ -78,9 +82,16 @@ jobs:
           git checkout -b "$TEMP_BRANCH"
           echo "temp_branch=$TEMP_BRANCH" >> $GITHUB_OUTPUT
 
-      - name: Build Agent Docker Image
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull Agent Docker Image
         run: |
-          docker build -t ${{ env.AGENT_IMAGE }} .
+          docker pull ${{ env.AGENT_IMAGE }}
 
       - name: Prepare agent home directory
         run: mkdir -p /tmp/agent-home
