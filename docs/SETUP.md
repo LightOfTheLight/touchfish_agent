@@ -2,46 +2,19 @@
 
 ## Prerequisites
 
-- Docker installed on the host machine
 - GitHub repository with admin access
-- Anthropic API key for Claude Code
+- Claude Pro subscription (for OAuth token) or Anthropic API key
 
 ---
 
-## 1. Self-Hosted Runner Setup
+## 1. Runner Setup
 
-GitHub Actions self-hosted runner is required for running agent containers with persistent storage.
+The TouchFish Agent system uses **GitHub-hosted cloud runners** (`ubuntu-latest`). No self-hosted runner is required.
 
-### 1.1 Add Runner to Repository
-
-1. Go to your repository on GitHub
-2. Navigate to **Settings** → **Actions** → **Runners**
-3. Click **New self-hosted runner**
-4. Select your OS (Linux recommended)
-5. Follow the instructions to download and configure the runner
-
-### 1.2 Runner Commands
-
-```bash
-# Download (example for Linux x64)
-mkdir actions-runner && cd actions-runner
-curl -o actions-runner-linux-x64-2.311.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.311.0/actions-runner-linux-x64-2.311.0.tar.gz
-tar xzf ./actions-runner-linux-x64-2.311.0.tar.gz
-
-# Configure
-./config.sh --url https://github.com/YOUR_USERNAME/touchfish_agent --token YOUR_TOKEN
-
-# Run as service (recommended)
-sudo ./svc.sh install
-sudo ./svc.sh start
-```
-
-### 1.3 Runner Requirements
-
-The runner host must have:
-- Docker installed and accessible
-- At least 4GB RAM
-- Network access to GitHub and Anthropic API
+The workflow automatically:
+1. Builds the Docker container on the cloud runner
+2. Runs the agent container with your repository mounted
+3. Pushes changes and creates a PR
 
 ---
 
@@ -68,21 +41,22 @@ Go to **Settings** → **Secrets and variables** → **Actions** and add:
 
 | Secret Name | Description |
 |-------------|-------------|
-| `ANTHROPIC_API_KEY` | Your Anthropic API key for Claude Code |
+| `CLAUDE_CODE_OAUTH_TOKEN` | OAuth token from Claude Pro subscription (recommended) |
+| `ANTHROPIC_API_KEY` | Anthropic API key (alternative to OAuth token) |
 
-### 3.2 Claude Code Configuration
+You only need one of the above secrets. `CLAUDE_CODE_OAUTH_TOKEN` is recommended for Claude Pro subscribers.
 
-On the self-hosted runner, configure Claude Code:
+### 3.2 Getting Your OAuth Token
+
+For Claude Pro subscribers:
 
 ```bash
-# Create Claude config directory
-mkdir -p ~/.claude
-
-# Login to Claude Code (interactive)
+# Login to Claude Code locally
 claude login
 
-# Or set API key directly
-export ANTHROPIC_API_KEY=your_api_key_here
+# Find your OAuth token
+cat ~/.claude/.credentials.json
+# Copy the oauth_token value
 ```
 
 ---
@@ -94,14 +68,20 @@ export ANTHROPIC_API_KEY=your_api_key_here
 ```bash
 # Test container startup
 docker run --rm \
+  --user "$(id -u):$(id -g)" \
   -v $(pwd):/workspace \
+  -v /tmp/agent-home:/home/agent \
+  -e HOME=/home/agent \
   -e AGENT_NAME=DEV \
   -e GITHUB_TOKEN=test \
+  -e CLAUDE_CODE_OAUTH_TOKEN=your_token_here \
   -e COMMIT_MESSAGE="Test message" \
   -e BRANCH_NAME=test \
   -e REPO_NAME=test/repo \
   touchfish-agent:latest echo "Container works!"
 ```
+
+> **Note:** The `--user` flag and `-v /tmp/agent-home:/home/agent` are required so the container runs as your host user and can write to the mounted workspace volume.
 
 ### 4.2 Workflow Test
 
@@ -161,17 +141,6 @@ git push
 
 ## 6. Troubleshooting
 
-### Runner Not Picking Up Jobs
-
-```bash
-# Check runner status
-cd actions-runner
-./svc.sh status
-
-# View logs
-journalctl -u actions.runner.YOUR_REPO.YOUR_RUNNER -f
-```
-
 ### Container Build Fails
 
 ```bash
@@ -190,18 +159,13 @@ docker build --progress=plain -t touchfish-agent:latest .
    claude auth status
    ```
 
-2. Verify API key is set:
-   ```bash
-   echo $ANTHROPIC_API_KEY
-   ```
+2. Verify OAuth token or API key is set in GitHub Secrets
+
+3. Check GitHub Actions workflow logs for error details
 
 ### Permission Issues
 
-```bash
-# Ensure runner user can access Docker
-sudo usermod -aG docker $USER
-newgrp docker
-```
+If the agent cannot write to the workspace, ensure the `run-agent` job passes `--user "$(id -u):$(id -g)"` to the docker run command. This is already configured in the workflow.
 
 ---
 
@@ -242,4 +206,4 @@ newgrp docker
 ---
 
 *Document maintained by: DEV Agent*
-*Last updated: 2026-02-05*
+*Last updated: 2026-02-28*
