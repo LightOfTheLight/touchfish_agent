@@ -86,6 +86,15 @@ Read the commit message above to understand your task. Follow your role definiti
 When complete:
 1. Commit your changes with descriptive messages
 2. Update your history.md with session notes
+$(if [[ "$AGENT_NAME" == "TESTER" ]]; then
+cat << 'TESTER_EOF'
+3. IMPORTANT: Write a `.agent-test-result` file in the repository root with your verdict:
+   - If all tests pass: write "PASS" followed by a summary
+   - If bugs found for DEV to fix: write "FAIL @DEV" followed by issue details
+   - If requirements need PO clarification: write "FAIL @PO" followed by what needs clarifying
+   This file controls the automated pipeline - it MUST be created before your session ends.
+TESTER_EOF
+fi)
 EOF
 }
 
