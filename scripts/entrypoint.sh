@@ -86,13 +86,29 @@ Read the commit message above to understand your task. Follow your role definiti
 When complete:
 1. Commit your changes with descriptive messages
 2. Update your history.md with session notes
-$(if [[ "$AGENT_NAME" == "TESTER" ]]; then
+$(if [[ "$AGENT_NAME" == "PO" ]]; then
+cat << 'PO_EOF'
+3. IMPORTANT: Your final commit message MUST end with "@DEV" to hand off to the DEV agent for implementation.
+   Example: "Requirements finalized for initial Chrome extension @DEV"
+   This triggers the automated pipeline to continue with development.
+PO_EOF
+elif [[ "$AGENT_NAME" == "DEV" ]]; then
+cat << 'DEV_EOF'
+3. IMPORTANT: Your final commit message MUST end with "@TESTER" to hand off to the TESTER agent for validation.
+   Example: "Implement bookmark management and popup UI @TESTER"
+   This triggers the automated pipeline to continue with testing.
+DEV_EOF
+elif [[ "$AGENT_NAME" == "TESTER" ]]; then
 cat << 'TESTER_EOF'
 3. IMPORTANT: Write a `.agent-test-result` file in the repository root with your verdict:
    - If all tests pass: write "PASS" followed by a summary
    - If bugs found for DEV to fix: write "FAIL @DEV" followed by issue details
    - If requirements need PO clarification: write "FAIL @PO" followed by what needs clarifying
    This file controls the automated pipeline - it MUST be created before your session ends.
+4. Your final commit message must reflect the verdict:
+   - If PASS: use a normal descriptive message (pipeline will create a PR)
+   - If FAIL @DEV: end the commit message with "@DEV" to re-trigger development
+   - If FAIL @PO: end the commit message with "@PO" to re-trigger requirements
 TESTER_EOF
 fi)
 EOF
