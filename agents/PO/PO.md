@@ -56,8 +56,8 @@ The PO (Product Owner) agent acts as the bridge between user requirements and te
 
 1. Update `REQUIREMENT.md` with formalized requirements
 2. Update `agents/PO/history.md` with session notes
-3. Commit all changes with descriptive messages
-4. Create or update PR with summary of changes
+3. Commit all changes with a message ending in `@DEV` to hand off to the DEV agent for implementation (e.g. `"Requirements ready for implementation @DEV"`)
+4. The `@DEV` trigger in the commit message will automatically trigger the DEV agent via GitHub Actions
 
 ---
 
