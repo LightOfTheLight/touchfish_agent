@@ -6,12 +6,17 @@ services:
       context: .
       dockerfile: Dockerfile
     image: touchfish-agent:latest
+    # Run as host user to match CI environment (avoids volume permission issues)
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - .:/workspace
-      - ${HOME}/.claude:/root/.claude
+      - ./tmp/agent-home:/home/agent
     environment:
+      - HOME=/home/agent
       - AGENT_NAME=${AGENT_NAME:-DEV}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - COMMIT_MESSAGE=${COMMIT_MESSAGE:-"Local development session"}
       - BRANCH_NAME=${BRANCH_NAME:-dev}
       - REPO_NAME=${REPO_NAME:-local/touchfish-agent}
@@ -23,12 +28,15 @@ services:
       context: .
       dockerfile: Dockerfile
     image: touchfish-agent:latest
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - .:/workspace
-      - ${HOME}/.claude:/root/.claude
+      - ./tmp/agent-home:/home/agent
     environment:
+      - HOME=/home/agent
       - AGENT_NAME=${AGENT_NAME:-DEV}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN}
     working_dir: /workspace
     entrypoint: /bin/bash
     stdin_open: true
